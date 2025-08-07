@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)  # React에서 API 호출할 수 있도록 CORS 설정
 
 # DB 파일 경로
-DB_PATH = "../db(PM.VER)/welfare_policies.db"
+DB_PATH = "db(PM.VER)/welfare_policies.db"
 
 def get_db_connection():
     """데이터베이스 연결"""
