@@ -140,16 +140,49 @@ function App() {
     const ageMatch = message.match(/(\d+)세|(\d+)살/);
     const hasAge = ageMatch || message.includes("20대") || message.includes("청년");
     
-    // 키워드 확인
-    const keywords = ["지원금", "복지", "정책", "혜택", "청년", "주거", "취업"];
-    const foundKeywords = keywords.filter(keyword => message.includes(keyword));
+    // 카테고리별 키워드 확인
+    const categoryKeywords = {
+      housing: ["주거", "월세", "전세", "임대료", "주택", "거주", "주거지원", "주거비", "임대", "보증금"],
+      employment: ["취업", "일자리", "구직", "채용", "고용", "취업지원", "구직활동", "인턴"],
+      culture: ["문화", "공연", "전시", "예술", "콘서트", "뮤지컬", "연극", "문화패스"],
+      transportation: ["교통", "교통비", "버스", "지하철", "대중교통"],
+      savings: ["저축", "적금", "계좌", "금융", "투자"],
+      general: ["지원금", "복지", "정책", "혜택", "청년", "지원"]
+    };
     
-    if (foundRegion && hasAge && foundKeywords.length > 0) {
+    // 구체적인 카테고리 찾기
+    let foundCategory = null;
+    let foundKeywords = [];
+    
+    for (const [category, keywords] of Object.entries(categoryKeywords)) {
+      const matchedKeywords = keywords.filter(keyword => message.includes(keyword));
+      if (matchedKeywords.length > 0) {
+        if (category !== 'general') {
+          foundCategory = category;
+          foundKeywords = matchedKeywords;
+          break; // 구체적인 카테고리를 찾으면 중단
+        } else {
+          foundKeywords = matchedKeywords; // 일반 키워드는 백업으로 저장
+        }
+      }
+    }
+    
+    const categoryNames = {
+      housing: "주거 관련",
+      employment: "취업 관련", 
+      culture: "문화 관련",
+      transportation: "교통 관련",
+      savings: "저축 관련"
+    };
+    
+    if (foundRegion && hasAge && (foundCategory || foundKeywords.length > 0)) {
+      const categoryText = foundCategory ? categoryNames[foundCategory] : "관련";
       return {
-        response: `${foundRegion} 지역의 관련 정책을 찾아드릴게요! 잠시만 기다려주세요.`,
+        response: `${foundRegion} 지역의 ${categoryText} 정책을 찾아드릴게요! 잠시만 기다려주세요.`,
         shouldSearchPolicies: true,
         region: foundRegion,
-        keywords: foundKeywords
+        keywords: foundKeywords,
+        category: foundCategory
       };
     } else if (!foundRegion) {
       return {
@@ -161,9 +194,9 @@ function App() {
         response: "나이대를 알려주시면 더 정확한 정책을 찾아드릴 수 있어요. 몇 살이신가요?",
         shouldSearchPolicies: false
       };
-    } else if (foundKeywords.length === 0) {
+    } else if (!foundCategory && foundKeywords.length === 0) {
       return {
-        response: "어떤 종류의 지원이나 정책에 관심이 있으신가요? (예: 주거지원, 취업지원, 청년복지 등)",
+        response: "어떤 종류의 지원이나 정책에 관심이 있으신가요? (예: 주거지원, 취업지원, 문화지원 등)",
         shouldSearchPolicies: false
       };
     } else {
@@ -359,22 +392,64 @@ function App() {
       console.log("정책 검색 결과:", data);
       console.log("검색된 정책 수:", data.policies ? data.policies.length : 0);
       
-      // 프론트엔드에서 키워드 필터링 (더 관대하게)
+      // 프론트엔드에서 키워드 필터링 (구체적인 카테고리별)
       let filteredPolicies = data.policies || [];
+      console.log("🔍 필터링 시작 - userInput:", userInput);
+      console.log("🔍 원본 정책 수:", filteredPolicies.length);
+      
       if (userInput) {
-        const keywords = ["지원금", "복지", "정책", "혜택", "청년", "주거", "취업", "취업지원", "주거지원", "청년지원", "지원"];
-        const userKeywords = keywords.filter(keyword => 
-          userInput.toLowerCase().includes(keyword.toLowerCase())
-        );
+        const userInputLower = userInput.toLowerCase();
+        console.log("🔍 소문자 변환된 입력:", userInputLower);
         
-        // 키워드가 있으면 필터링, 없으면 모든 정책 표시
-        if (userKeywords.length > 0) {
+        // 카테고리별 키워드 그룹
+        const categoryKeywords = {
+          housing: ["주거", "월세", "전세", "임대료", "주택", "거주", "주거지원", "주거비", "임대", "보증금"],
+          employment: ["취업", "일자리", "구직", "채용", "고용", "취업지원", "구직활동", "인턴"],
+          culture: ["문화", "공연", "전시", "예술", "콘서트", "뮤지컬", "연극", "문화패스"],
+          transportation: ["교통", "교통비", "버스", "지하철", "대중교통", "k-패스", "기후동행카드"],
+          savings: ["저축", "적금", "계좌", "금융", "투자"],
+          general: ["지원금", "복지", "정책", "혜택", "청년", "지원"]
+        };
+        
+        // 사용자 입력에서 구체적인 카테고리 찾기
+        let matchedCategory = null;
+        for (const [category, keywords] of Object.entries(categoryKeywords)) {
+          if (category !== 'general' && keywords.some(keyword => userInputLower.includes(keyword))) {
+            matchedCategory = category;
+            console.log("🎯 매칭된 카테고리:", category, "키워드:", keywords.filter(k => userInputLower.includes(k)));
+            break;
+          }
+        }
+        
+        console.log("🎯 최종 매칭된 카테고리:", matchedCategory);
+        
+        // 구체적인 카테고리가 있으면 해당 카테고리로 필터링
+        if (matchedCategory) {
+          const categoryWords = categoryKeywords[matchedCategory];
+          console.log("🔍 필터링에 사용할 키워드들:", categoryWords);
+          
+          const originalCount = filteredPolicies.length;
           filteredPolicies = filteredPolicies.filter(policy => {
             const policyText = `${policy.title} ${policy.benefits || ''} ${policy.conditions || ''}`.toLowerCase();
-            return userKeywords.some(keyword => policyText.includes(keyword.toLowerCase()));
+            const hasMatch = categoryWords.some(keyword => policyText.includes(keyword));
+            if (hasMatch) {
+              console.log("✅ 매칭된 정책:", policy.title);
+            }
+            return hasMatch;
           });
+          console.log(`🔍 카테고리 필터링 결과: ${originalCount}개 → ${filteredPolicies.length}개`);
+        } else {
+          // 일반적인 키워드만 있으면 모든 정책 표시
+          const generalKeywords = categoryKeywords.general;
+          const hasGeneralKeyword = generalKeywords.some(keyword => userInputLower.includes(keyword));
+          console.log("🔍 일반 키워드 체크:", hasGeneralKeyword);
+          
+          if (hasGeneralKeyword) {
+            // 일반 키워드인 경우 모든 정책 표시 (기존 방식 유지)
+            filteredPolicies = data.policies || [];
+            console.log("🔍 일반 키워드로 모든 정책 표시:", filteredPolicies.length);
+          }
         }
-        // 키워드가 없어도 모든 정책 표시
       }
       
       console.log("필터링된 정책 수:", filteredPolicies.length);
