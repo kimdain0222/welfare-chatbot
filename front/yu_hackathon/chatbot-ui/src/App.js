@@ -453,15 +453,7 @@ function App() {
   };
 
   // 정책 검색 시도 함수 (기존 버전 - 호환성을 위해 유지)
-  const tryPolicySearch = async (userInput, aiResponse) => {
-    // 지역과 키워드 추출 시도
-    const regions = ["서울", "경기", "인천"];
-    const foundRegion = regions.find(region => userInput.includes(region));
-    
-    if (foundRegion) {
-      await performPolicySearch(foundRegion, userInput);
-    }
-  };
+
 
   const handleRegionClick = (region) => {
     if (selectedRegion) return;
