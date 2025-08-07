@@ -340,7 +340,7 @@ function App() {
       ]);
 
       // 먼저 지역별 정책을 가져오기
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://welfare-chatbot-production.up.railway.app';
   const apiUrl = `${API_BASE_URL}/api/policies/region/${dbRegion}`;
       console.log("API 호출 URL:", apiUrl);
       
