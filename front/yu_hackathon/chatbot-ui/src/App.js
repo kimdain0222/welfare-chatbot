@@ -469,6 +469,7 @@ function App() {
     setRegionSelectedAt(new Date());
 
     const dbRegion = regionMap[region];
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://welfare-chatbot-production.up.railway.app';
             fetch(`${API_BASE_URL}/api/policies/region/${dbRegion}`)
       .then((res) => res.json())
       .then((data) => {
