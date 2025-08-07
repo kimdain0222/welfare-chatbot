@@ -340,7 +340,7 @@ function App() {
       ]);
 
       // 먼저 지역별 정책을 가져오기
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://welfare-chatbot-production.up.railway.app';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://web-production-a9d2.up.railway.app';
   const apiUrl = `${API_BASE_URL}/api/policies/region/${dbRegion}`;
       console.log("API 호출 URL:", apiUrl);
       
@@ -461,7 +461,7 @@ function App() {
     setRegionSelectedAt(new Date());
 
     const dbRegion = regionMap[region];
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://welfare-chatbot-production.up.railway.app';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://web-production-a9d2.up.railway.app';
             fetch(`${API_BASE_URL}/api/policies/region/${dbRegion}`)
       .then((res) => res.json())
       .then((data) => {
