@@ -3,7 +3,7 @@ from flask_cors import CORS
 import json
 
 app = Flask(__name__)
-CORS(app)  # React에서 API 호출할 수 있도록 CORS 설정
+CORS(app, origins=['https://welfarechatbot02.netlify.app', 'http://localhost:3000'])  # React에서 API 호출할 수 있도록 CORS 설정
 
 @app.route('/api/health', methods=['GET'])
 def health_check():

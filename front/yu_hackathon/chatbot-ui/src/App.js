@@ -359,20 +359,22 @@ function App() {
       console.log("정책 검색 결과:", data);
       console.log("검색된 정책 수:", data.policies ? data.policies.length : 0);
       
-      // 프론트엔드에서 키워드 필터링
+      // 프론트엔드에서 키워드 필터링 (더 관대하게)
       let filteredPolicies = data.policies || [];
       if (userInput) {
-        const keywords = ["지원금", "복지", "정책", "혜택", "청년", "주거", "취업", "취업지원", "주거지원", "청년지원"];
+        const keywords = ["지원금", "복지", "정책", "혜택", "청년", "주거", "취업", "취업지원", "주거지원", "청년지원", "지원"];
         const userKeywords = keywords.filter(keyword => 
           userInput.toLowerCase().includes(keyword.toLowerCase())
         );
         
+        // 키워드가 있으면 필터링, 없으면 모든 정책 표시
         if (userKeywords.length > 0) {
           filteredPolicies = filteredPolicies.filter(policy => {
             const policyText = `${policy.title} ${policy.benefits || ''} ${policy.conditions || ''}`.toLowerCase();
             return userKeywords.some(keyword => policyText.includes(keyword.toLowerCase()));
           });
         }
+        // 키워드가 없어도 모든 정책 표시
       }
       
       console.log("필터링된 정책 수:", filteredPolicies.length);
